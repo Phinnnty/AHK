@@ -1,6 +1,9 @@
 Persistent
 #SingleInstance Force
 
+; Define default file name without .csv extension
+DefaultFileName := A_ScriptDir "\TaskList"
+
 ; Initialize Main GUI
 Main := Gui("+Resize", "Work Management")
 
@@ -39,8 +42,8 @@ LoadButton.OnEvent("Click", LoadTasks)
 ; Show GUI
 Main.Show()
 
-; Automatically load tasks from TaskList.csv if it exists
-LoadDefaultTasks()
+; Automatically load tasks from TaskList if it exists
+SetTimer(LoadDefaultTasks, -100)
 
 return
 
@@ -124,20 +127,17 @@ TaskSelected(*) {
 }
 
 SaveTasks(*) {
-    Global TaskListView
+    Global TaskListView, DefaultFileName
 
     ; Set a default file name
-    DefaultFileName := "TaskList"
-    
-    ; Open file selection dialog with default file name
-    SavePath := FileSelect("Save", DefaultFileName, "csv)")
-    
+    SavePath := FileSelect("Save", DefaultFileName , "Save Task List As", "*.csv")
+
     if (!SavePath) {
         return
     }
-    
-    ; Ensure the selected file has a .csv extension
-    if (SubStr(SavePath, -3) != ".csv") {
+
+    ; Ensure the selected file has a .csv extension only once
+    if (SubStr(SavePath, -4) != ".csv") {
         SavePath := SavePath ".csv"
     }
 
@@ -155,9 +155,9 @@ SaveTasks(*) {
 }
 
 LoadTasks(*) {
-    Global TaskListView
+    Global TaskListView, DefaultFileName
 
-    LoadPath := FileSelect("Open", "TaskList", "csv)")
+    LoadPath := FileSelect("Open", DefaultFileName, "Load Task List", "*.csv")
     if (!LoadPath) {
         return
     }
@@ -165,20 +165,25 @@ LoadTasks(*) {
     MsgBox("Tasks loaded successfully.", "Info", 64)
 }
 
-LoadDefaultTasks() {
-    DefaultFileName := "TaskList.csv"
-    MsgBox("Checking for file: " DefaultFileName)
-    if FileExist(DefaultFileName) {
-        MsgBox("File exists: " DefaultFileName)
-        LoadFromFile(DefaultFileName)
+LoadDefaultTasks(*) {
+    Global DefaultFileName
+    MsgBox("Checking for file: " DefaultFileName ".csv") ; Debugging message
+    if FileExist(DefaultFileName ".csv") {
+        MsgBox("File exists: " DefaultFileName ".csv") ; Debugging message
+        LoadFromFile(DefaultFileName ".csv")
     } else {
-        MsgBox("File does not exist: " DefaultFileName)
+        MsgBox("File does not exist: " DefaultFileName ".csv") ; Debugging message
     }
 }
 
 LoadFromFile(FilePath) {
     Global TaskListView
+    MsgBox("Loading from file: " FilePath) ; Debugging message
     File := FileOpen(FilePath, "r")
+    if (!File) {
+        MsgBox("Failed to open file: " FilePath)
+        return
+    }
     TaskListView.Delete()
     while (!File.AtEOF) {
         Line := File.ReadLine()
@@ -190,6 +195,7 @@ LoadFromFile(FilePath) {
         }
     }
     File.Close()
+    MsgBox("Finished loading from file: " FilePath) ; Debugging message
 }
 
 GuiClose(*) {
