@@ -70,7 +70,13 @@ EditTask(*) {
     TaskName := TaskNameEdit.Value
     TaskDescription := TaskDescriptionEdit.Value
 
+    if (TaskName = "") {
+        MsgBox("Task Name cannot be empty.", "Error", 48)
+        return
+    }
+
     TaskListView.Modify(Row, "", TaskName, TaskDescription)
+    MsgBox("Task edited: " TaskName " - " TaskDescription)
     ClearFields()
 }
 
@@ -105,7 +111,7 @@ SaveTasks(*) {
     DefaultFileName := A_ScriptDir "\TaskList.csv"
     
     ; Open file selection dialog with default file name
-    SavePath := FileSelect("Save", DefaultFileName ".csv)", ".csv")
+    SavePath := FileSelect("Save", DefaultFileName ".csv)", "")
     
     if (!SavePath) {
         return
@@ -126,8 +132,6 @@ SaveTasks(*) {
     File.Close()
     MsgBox("Tasks saved successfully.", "Info", 64)
 }
-
-
 
 LoadTasks(*) {
     Global TaskListView
