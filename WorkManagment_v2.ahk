@@ -1,3 +1,9 @@
+; would be nice to add a Completed Task button which moves the task to a histroically completed worksheet.
+; would be fun to add a temporary celebratory gif or png when task is completed. 
+; would be nice to add functionallity so that it has multiple .csv files, or works off of a .xls file format
+; this would mean more worksheets = tabs on the GUI. 
+; would be nice to have tabs for (1) active tasks / backlog tasks (2) historic tasks (3) archived historic tasks (hidden). 
+
 Persistent
 #SingleInstance Force
 
@@ -5,35 +11,46 @@ Persistent
 DefaultFileName := A_ScriptDir "\TaskList"
 
 ; Initialize Main GUI
-Main := Gui("+Resize", "Work Management")
+Main := Gui("+Resize +AlwaysOnTop", "Work Management")
+Main.MarginX := 20
+Main.MarginY := 20
 
 ; Define Controls
-Main.Add("Text", "x10 y10 w120", "Task Name:")
-TaskNameEdit := Main.Add("Edit", "x140 y10 w200 vTaskName")
+Main.Add("Text", "xm ym w120", "Task Name:")
+TaskNameEdit := Main.Add("Edit", "xm+140 yp w200 vTaskName")
 
-Main.Add("Text", "x10 y40 w120", "Task Description:")
-TaskDescriptionEdit := Main.Add("Edit", "x140 y40 w200 vTaskDescription")
+Main.Add("Text", "xm y+30 w120", "Task Description:")
+TaskDescriptionEdit := Main.Add("Edit", "xm+140 yp w200 vTaskDescription")
 
-Main.Add("Text", "x10 y70 w120", "Priority:")
-PriorityDropdown := Main.Add("DropDownList", "x140 y70 w200 vTaskPriority", ["Low", "Medium", "High"])
+Main.Add("Text", "xm y+30 w120", "Priority:")
+PriorityDropdown := Main.Add("DropDownList", "xm+140 yp w200 vTaskPriority", ["Low", "Medium", "High"])
 
-Main.Add("Text", "x10 y100 w120", "Due Date:")
-DueDateEdit := Main.Add("Edit", "x140 y100 w200 vTaskDueDate")
+Main.Add("Text", "xm y+30 w120", "Due Date:")
+DueDateEdit := Main.Add("Edit", "xm+140 yp w200 vTaskDueDate")
 
-AddTaskButton := Main.Add("Button", "x10 y130 w100", "Add Task")
-ClearFieldsButton := Main.Add("Button", "x120 y130 w100", "Clear")
+AddTaskButton := Main.Add("Button", "xm y+40 w100", "Add Task")
+ClearFieldsButton := Main.Add("Button", "x+10 w100", "Clear")
 
-TaskListView := Main.Add("ListView", "x10 y160 w450 h200", ["Task Name", "Task Description", "Priority", "Due Date"])
-EditTaskButton := Main.Add("Button", "x10 y370 w100", "Edit Task")
-DeleteTaskButton := Main.Add("Button", "x120 y370 w100", "Delete Task")
+TaskListView := Main.Add("ListView", "xm y+20 w450 h200", ["Task Name", "Task Description", "Priority", "Due Date"])
+EditTaskButton := Main.Add("Button", "xm y+210 w100", "Edit Task")
+DeleteTaskButton := Main.Add("Button", "x+10 w100", "Delete Task")
 
-SaveButton := Main.Add("Button", "x230 y370 w100", "Save Tasks")
-LoadButton := Main.Add("Button", "x340 y370 w100", "Load Tasks")
+SaveButton := Main.Add("Button", "x+10 w100", "Save Tasks")
+LoadButton := Main.Add("Button", "x+10 w100", "Load Tasks")
+
+; Status bar
+StatusBar := Main.Add("Text", "xm y+40 w450 h20", "")
+
+; Set ListView styles
+TaskListView.OnEvent("ItemSelect", TaskSelected)
+TaskListView.ModifyCol(1, "AutoHdr")
+TaskListView.ModifyCol(2, "AutoHdr")
+TaskListView.ModifyCol(3, "AutoHdr")
+TaskListView.ModifyCol(4, "AutoHdr")
 
 ; Event Handlers
 AddTaskButton.OnEvent("Click", AddTask)
 ClearFieldsButton.OnEvent("Click", ClearFields)
-TaskListView.OnEvent("ItemSelect", TaskSelected)
 EditTaskButton.OnEvent("Click", EditTask)
 DeleteTaskButton.OnEvent("Click", DeleteTask)
 SaveButton.OnEvent("Click", SaveTasks)
@@ -49,7 +66,7 @@ return
 
 ; Functions and Handlers
 AddTask(*) {
-    Global TaskNameEdit, TaskDescriptionEdit, PriorityDropdown, DueDateEdit, TaskListView
+    Global TaskNameEdit, TaskDescriptionEdit, PriorityDropdown, DueDateEdit, TaskListView, StatusBar
 
     TaskName := TaskNameEdit.Value
     TaskDescription := TaskDescriptionEdit.Value
@@ -57,12 +74,12 @@ AddTask(*) {
     TaskDueDate := DueDateEdit.Value
 
     if (TaskName = "") {
-        MsgBox("Task Name cannot be empty.", "Error", 48)
+        StatusBar.Text := "Error: Task Name cannot be empty."
         return
     }
 
-    TaskListView.Add("", TaskName, TaskDescription, TaskPriority, TaskDueDate)
-    MsgBox("Task added: " TaskName " - " TaskDescription " - " TaskPriority " - " TaskDueDate)
+    Row := TaskListView.Add("", TaskName, TaskDescription, TaskPriority, TaskDueDate)
+    StatusBar.Text := "Task added: " TaskName " - " TaskDescription " - " TaskPriority " - " TaskDueDate
     ClearFields()
 }
 
@@ -75,11 +92,11 @@ ClearFields(*) {
 }
 
 EditTask(*) {
-    Global TaskNameEdit, TaskDescriptionEdit, PriorityDropdown, DueDateEdit, TaskListView
+    Global TaskNameEdit, TaskDescriptionEdit, PriorityDropdown, DueDateEdit, TaskListView, StatusBar
 
     Row := TaskListView.GetNext()
     if (Row = 0) {
-        MsgBox("Please select a task to edit.", "Error", 48)
+        StatusBar.Text := "Error: Please select a task to edit."
         return
     }
 
@@ -89,24 +106,25 @@ EditTask(*) {
     TaskDueDate := DueDateEdit.Value
 
     if (TaskName = "") {
-        MsgBox("Task Name cannot be empty.", "Error", 48)
+        StatusBar.Text := "Error: Task Name cannot be empty."
         return
     }
 
     TaskListView.Modify(Row, "", TaskName, TaskDescription, TaskPriority, TaskDueDate)
-    MsgBox("Task edited: " TaskName " - " TaskDescription " - " TaskPriority " - " TaskDueDate)
+    StatusBar.Text := "Task edited: " TaskName " - " TaskDescription " - " TaskPriority " - " TaskDueDate
     ClearFields()
 }
 
 DeleteTask(*) {
-    Global TaskListView
+    Global TaskListView, StatusBar
 
     Row := TaskListView.GetNext()
     if (Row = 0) {
-        MsgBox("Please select a task to delete.", "Error", 48)
+        StatusBar.Text := "Error: Please select a task to delete."
         return
     }
     TaskListView.Delete(Row)
+    StatusBar.Text := "Task deleted."
     ClearFields()
 }
 
@@ -127,19 +145,9 @@ TaskSelected(*) {
 }
 
 SaveTasks(*) {
-    Global TaskListView, DefaultFileName
+    Global TaskListView, DefaultFileName, StatusBar
 
-    ; Set a default file name
-    SavePath := FileSelect("Save", DefaultFileName , "Save Task List As", "*.csv")
-
-    if (!SavePath) {
-        return
-    }
-
-    ; Ensure the selected file has a .csv extension only once
-    if (SubStr(SavePath, -4) != ".csv") {
-        SavePath := SavePath ".csv"
-    }
+    SavePath := DefaultFileName ".csv"
 
     File := FileOpen(SavePath, "w")
     Loop (TaskListView.GetCount()) {
@@ -151,34 +159,29 @@ SaveTasks(*) {
         File.WriteLine(TaskName "," TaskDescription "," TaskPriority "," TaskDueDate)
     }
     File.Close()
-    MsgBox("Tasks saved successfully.", "Info", 64)
+    StatusBar.Text := "Tasks saved successfully."
 }
 
 LoadTasks(*) {
-    Global TaskListView, DefaultFileName
+    Global TaskListView, DefaultFileName, StatusBar
 
     LoadPath := FileSelect("Open", DefaultFileName, "Load Task List", "*.csv")
     if (!LoadPath) {
         return
     }
     LoadFromFile(LoadPath)
-    MsgBox("Tasks loaded successfully.", "Info", 64)
+    StatusBar.Text := "Tasks loaded successfully."
 }
 
 LoadDefaultTasks(*) {
     Global DefaultFileName
-    MsgBox("Checking for file: " DefaultFileName ".csv") ; Debugging message
     if FileExist(DefaultFileName ".csv") {
-        MsgBox("File exists: " DefaultFileName ".csv") ; Debugging message
         LoadFromFile(DefaultFileName ".csv")
-    } else {
-        MsgBox("File does not exist: " DefaultFileName ".csv") ; Debugging message
     }
 }
 
 LoadFromFile(FilePath) {
-    Global TaskListView
-    MsgBox("Loading from file: " FilePath) ; Debugging message
+    Global TaskListView, StatusBar
     File := FileOpen(FilePath, "r")
     if (!File) {
         MsgBox("Failed to open file: " FilePath)
@@ -190,12 +193,12 @@ LoadFromFile(FilePath) {
         if (Line) {
             Fields := StrSplit(Line, ",")
             if (Fields.Length = 4) {
-                TaskListView.Add("", Fields[1], Fields[2], Fields[3], Fields[4])
+                Row := TaskListView.Add("", Fields[1], Fields[2], Fields[3], Fields[4])
             }
         }
     }
     File.Close()
-    MsgBox("Finished loading from file: " FilePath) ; Debugging message
+    StatusBar.Text := "Tasks loaded from file: " FilePath
 }
 
 GuiClose(*) {
