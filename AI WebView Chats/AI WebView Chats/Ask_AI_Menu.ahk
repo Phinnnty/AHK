@@ -12,6 +12,23 @@ SetWorkingDir(A_ScriptDir)
 ;; HOTKEY CTRL + ALT + A ;;    
     ^!A::ShowMenu()
 
+;; MENU GENERATION & DYNAMIC CLIPBOARD ITEM ;;    
+    ShowMenu() {
+        global Ask_AI
+        clipboardContent := CopyToClipboard()
+        global Search_text := clipboardContent
+    
+        
+        if (StrLen(clipboardContent) == 0) {
+            RenameClipboardMenuItem("`t Clipboard is empty")
+        } else {
+            truncatedText := StrLen(clipboardContent) > 50 ? SubStr(clipboardContent, 1, 50) . "..." : clipboardContent
+            RenameClipboardMenuItem("Clipboard: `t" . truncatedText)
+        }
+    
+        Ask_AI.Show()
+    }
+    
 ; Create the main menu
     Ask_AI := Menu()
 
@@ -24,7 +41,7 @@ SetWorkingDir(A_ScriptDir)
 
 CreateGPTMenu() {
     GptSubmenu := Menu()
-    GptSubmenu.Add("Fix Spelling & Grammar", (*) => OpenChatGPTWithQuery("Correct any spelling and grammatical errors in the following text. Ensure proper punctuation and sentence structure."))
+    GptSubmenu.Add("Fix Spelling and Grammar", (*) => OpenChatGPTWithQuery("Correct any spelling and grammatical errors in the following text. Ensure proper punctuation and sentence structure."))
     GptSubmenu.Add("Improve Clarity", (*) => OpenChatGPTWithQuery("Rewrite the following text to improve clarity and readability. Maintain the original meaning and highlight changes made."))
     GptSubmenu.Add("Explain Topic", (*) => OpenChatGPTWithQuery("Provide a detailed explanation of the following text, breaking it down for easier understanding."))
     GptSubmenu.Add()
@@ -65,39 +82,24 @@ GenerateChatGPTURL(prompt) {
 
 ; Creates a new tab on ChatGPT and sends your query
 OpenChatGPTWithQuery(prompt) {
-    global tooltipBoard, Search_text
+    global Search_text
     url := GenerateChatGPTURL(prompt)
     A_Clipboard := prompt . ' > ' . Search_text
     
-;;    tooltipBoard.Show()
-;;    tooltipBoard.DrawTip("Opening ChatGPT with query: '" . prompt . "'")
+
     Run(A_ScriptDir . "\WV_OpenChatGPT.ahk `"" . url . "`"")
     Sleep(3000)
     Send("{Tab}" . '^v' . "{Enter}")
-
-;;    Sleep(2000)
-;;    tooltipBoard.DrawTip("")
-;;    tooltipBoard.Hide()
-}
-
-; Creates a new tab on Claude 3.5 and sends your query
-GenerateClaudeURL(prompt) {
-    global Search_text
-    url := "https://claude.ai/new?q=" . Prompt . '>' . Search_text
-    return url
 }
 
 OpenChatClaudeWithQuery(prompt) {
-    global tooltipBoard, Search_text
-    url := GenerateClaudeURL(prompt)
+    global Search_text
+    url := "https://claude.ai/new"
+    A_Clipboard := prompt . ' > ' . Search_text
     
-;;    tooltipBoard.Show()
-;;    tooltipBoard.DrawTip("Opening Claude 3.5 with query: '" . prompt . "'")
-    Run("WV_OpenClaude.ahk `"" . url . "`"")
-
-;;    Sleep(2000)
-;;    tooltipBoard.DrawTip("")
-;;    tooltipBoard.Hide()
+    Run(A_ScriptDir . "\WV_OpenClaude.ahk `"" . url . "`"")
+    Sleep(3000)
+    Send("^v{Enter}")
 }
 
 ;; ---- Functions to get dynamic updates to menu ----- ;; 
@@ -124,21 +126,6 @@ CopyToClipboard() {
     return clipText
 }
 
-ShowMenu() {
-    global Ask_AI
-    clipboardContent := CopyToClipboard()
-    global Search_text := clipboardContent
-
-    
-    if (StrLen(clipboardContent) == 0) {
-        RenameClipboardMenuItem("`t Clipboard is empty")
-    } else {
-        truncatedText := StrLen(clipboardContent) > 50 ? SubStr(clipboardContent, 1, 50) . "..." : clipboardContent
-        RenameClipboardMenuItem("Clipboard: `t" . truncatedText)
-    }
-
-    Ask_AI.Show()
-}
 
 ; Function to rename the clipboard content menu item
 RenameClipboardMenuItem(newTitle) {
@@ -186,3 +173,5 @@ FlushMenuThemes() {
     DllCall(localFlushMenuThemes)
     DllCall("kernel32.dll\FreeLibrary", "ptr", hModule)
 }
+
+ShowMenu()

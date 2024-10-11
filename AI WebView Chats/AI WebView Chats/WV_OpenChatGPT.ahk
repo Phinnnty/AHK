@@ -5,7 +5,7 @@ SetWorkingDir(A_ScriptDir)
 
 TraySetIcon("Icons/GPT.png") 
 
-main := Gui("+Resize", "ACL8R - ChatGPT")
+main := Gui("+Resize", "Ask AI - ChatGPT")
 main.OnEvent("Close", (*) => ExitApp())
 main.Show(Format("w{} h{}", A_ScreenWidth * 0.6, A_ScreenHeight * 0.6))
 
