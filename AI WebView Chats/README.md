@@ -11,7 +11,7 @@ Users can highlight texy anywhere on their screen and send it to Chat GPT or Cla
 ![image](https://github.com/user-attachments/assets/c673c197-56df-4423-b9aa-c6072d64472a)
 
 
-![image](https://github.com/user-attachments/assets/ef8f76d1-bd50-42eb-b930-7c9b97eb15aa)
+![image](https://github.com/user-attachments/assets/a625be37-0824-41b4-8b42-4a46980f3171)
 
 
 ![image](https://github.com/user-attachments/assets/e6930ab5-1328-4038-9164-8581f9bccaee)
