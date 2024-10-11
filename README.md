@@ -24,5 +24,4 @@ If you'd prefer to have your scripts launch at startup rather than double clicki
 
 Startup folder is found by searching "Run" on the task bar and inputting the following cmd : shell:startup
 
-![image](https://github.com/user-attachments/assets/d8c64d93-8d6f-4065-8711-b1521ab15e2e)
 ![image](https://github.com/user-attachments/assets/1ab9275d-9f1a-4024-b659-530fb26f88a4)
