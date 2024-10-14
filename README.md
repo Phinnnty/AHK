@@ -26,4 +26,4 @@ Startup folder is found by searching "Run" on the task bar and inputting the fol
 
 ![image](https://github.com/user-attachments/assets/1ab9275d-9f1a-4024-b659-530fb26f88a4)
 
-buymeacoffee.com/phinnnty
+<a href="https://www.buymeacoffee.com/phinnnty" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
