@@ -27,11 +27,3 @@ TurnScreenOff() {
 TurnScreenOn() {
     SendMessage, 0x112, 0xF170, -1,, Program Manager ; Use -1 to turn the monitor on.
 }
-
-OpenJira() {
-     Run, https://mxjira.murex.com/secure/Dashboard.jspa
-}
-
-OpenMXWiki() {
-    Run, https://mxwiki.murex.com/confluence/#recently-worked
-}
