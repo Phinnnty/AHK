@@ -4,6 +4,8 @@ The Microsoft Edge WebView2 control enables you to host web content in your appl
 
 The WebView2 Runtime is built into Win10(latest version) and Win11 and can be easily used in AHK.
 
+WebView2 was created by thqby https://github.com/thqby/ahk2_lib/tree/master/WebView2
+
 This is the basis of the AI WebView Chats scritps which allow users to access ChatGPT and Claude 3.5 from what appears to be their desktop. 
 
 Users can highlight texy anywhere on their screen and send it to Chat GPT or Claude 3.5 alongside a prompt for the AI to carry out tasks on the copied content. 
